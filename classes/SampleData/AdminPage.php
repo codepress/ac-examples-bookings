@@ -19,6 +19,14 @@ class AdminPage
 
     private const TRANSIENT = 'acx_bookings_install_result';
 
+    /**
+     * Admin page slug of the registered Hotel Bookings list table.
+     *
+     * The Data Sources addon builds it as Addon::slug('hbk_bookings'), i.e.
+     * 'acp-data-sources-' + the data source id used in CustomListTableInit.
+     */
+    private const LIST_TABLE_PAGE = 'acp-data-sources-hbk_bookings';
+
     /** @var Installer */
     private $installer;
 
@@ -103,6 +111,12 @@ class AdminPage
         if ($installed) {
             $this->render_status($this->installer->get_counts());
 
+            $link = $this->list_table_link();
+
+            if ($link !== '') {
+                echo '<p>' . $link . '</p>';
+            }
+
             echo '<p>' . esc_html__(
                 'The sample tables already exist. Drop them below to reset; you can then re-create and re-populate them.',
                 'ac-examples-bookings'
@@ -157,9 +171,12 @@ class AdminPage
         $status = isset($result['status']) ? (string) $result['status'] : '';
 
         if ($status === 'installed') {
+            $link = $this->list_table_link();
+
             printf(
-                '<div class="notice notice-success is-dismissible"><p>%s</p></div>',
-                esc_html__('Sample tables created and populated.', 'ac-examples-bookings')
+                '<div class="notice notice-success is-dismissible"><p>%s%s</p></div>',
+                esc_html__('Sample tables created and populated.', 'ac-examples-bookings'),
+                $link === '' ? '' : ' ' . $link
             );
 
             return;
@@ -191,6 +208,25 @@ class AdminPage
             $errors === []
                 ? ''
                 : '<pre>' . esc_html(implode("\n", array_map('strval', $errors))) . '</pre>'
+        );
+    }
+
+    /**
+     * Link to the registered Hotel Bookings list table.
+     *
+     * Returns an empty string when the Data Sources addon is inactive, so the
+     * page never offers a dead link to a screen that is not registered.
+     */
+    private function list_table_link(): string
+    {
+        if (! class_exists('ACA\\DataSources\\DataSourceRegistry')) {
+            return '';
+        }
+
+        return sprintf(
+            '<a href="%s">%s</a>',
+            esc_url(admin_url('admin.php?page=' . self::LIST_TABLE_PAGE)),
+            esc_html__('View the Hotel Bookings table →', 'ac-examples-bookings')
         );
     }
 
