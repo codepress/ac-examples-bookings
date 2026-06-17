@@ -23,6 +23,29 @@ human‑readable labels.
 
 ---
 
+## Get Started
+
+Seeing the result makes the code easier to read.
+
+1. Make sure **Admin Columns Pro 7.1+** is active with the **Data Sources**
+   addon enabled. (If it isn't, the plugin shows an admin notice explaining
+   why the table won't appear — see [`Requirements.php`](classes/Requirements.php).)
+2. [Download](https://github.com/codepress/ac-examples-bookings) the Hotel
+   Bookings example plugin and drop this folder into `wp-content/plugins/`. No
+   build step and no dependencies — the classes are loaded with plain `require`s
+   in the bootstrap, so there's nothing to install.
+3. Activate **"ACP Sample Data – Hotel Bookings"** in WordPress.
+4. Import the sample data: go to **Tools → Hotel Bookings Sample Data** and click
+   **"Create & populate sample tables"**. This creates `wp_hbk_guests`,
+   `wp_hbk_rooms` and `wp_hbk_bookings` and loads the demo rows.
+5. Open the new **Hotel Bookings** menu item in the admin sidebar and explore the
+   available views.
+
+To start over, the same Tools page has a **"Drop tables (reset)"** button.
+Deleting the plugin removes the tables too (see [`uninstall.php`](uninstall.php)).
+
+---
+
 ## The idea in one minute
 
 WordPress gives you list tables for posts, pages, users and comments out of the
@@ -47,27 +70,6 @@ So the work splits cleanly into two halves:
 
 This example covers both — the code in full, and the UI steps as a checklist so
 you can reproduce the polished result.
-
----
-
-## Try it first
-
-Seeing the result makes the code easier to read.
-
-1. Make sure **Admin Columns Pro 7.1+** is active with the **Data Sources**
-   addon enabled. (If it isn't, the plugin shows an admin notice explaining
-   why the table won't appear — see [`Requirements.php`](classes/Requirements.php).)
-2. Drop this folder into `wp-content/plugins/`. No build step and no
-   dependencies — the classes are loaded with plain `require`s in the
-   bootstrap, so there's nothing to install.
-3. Activate **"ACP Sample Data – Hotel Bookings"**.
-4. Go to **Tools → Hotel Bookings Sample Data** and click
-   **"Create & populate sample tables"**. This creates `wp_hbk_guests`,
-   `wp_hbk_rooms` and `wp_hbk_bookings` and loads the demo rows.
-5. Open the new **Hotel Bookings** menu item in the admin sidebar.
-
-To start over, the same Tools page has a **"Drop tables (reset)"** button.
-Deleting the plugin removes the tables too (see [`uninstall.php`](uninstall.php)).
 
 ---
 
@@ -296,11 +298,14 @@ The class docblock in
 [`CustomListTableInit.php`](classes/CustomListTableInit.php) lists these same
 steps next to the code, so you can see which half does what.
 
-**Don't want to do it by hand?** This plugin ships two of these arrangements as
-pre‑defined templates ([`data/*.json`](data/)). Open the Admin Columns template
-picker on the **Hotel Bookings** screen and load **"Bookings Example"** to apply
-the finished layout — columns, formats, filters and formatting rules — in one
-click, then tweak from there.
+**You don't have to do any of this by hand.** This plugin ships two of these
+arrangements as templates ([`data/*.json`](data/)) and **imports them as saved
+views on first run** (see
+[`ImportTemplates.php`](classes/Service/ImportTemplates.php)), so the **Hotel
+Bookings** screen opens with the finished layout — columns, formats, filters and
+formatting rules — already applied. Tweak from there, or use the Admin Columns
+template picker to reload **"Bookings Example"** at any time. (The auto‑import
+runs once; deleting or editing the views won't make it run again.)
 
 ---
 
@@ -321,6 +326,10 @@ new CustomListTableInit();          // <-- the part you came here for
 (new LocalTemplates(                // ship the data/*.json column templates
     new SplFileInfo(__DIR__ . '/data')
 ))->register();
+
+(new ImportTemplates(               // import those templates as saved views once
+    new SplFileInfo(__DIR__ . '/data')
+))->register();
 ```
 
 | File | Responsibility |
@@ -332,8 +341,9 @@ new CustomListTableInit();          // <-- the part you came here for
 | [`classes/SampleData/AdminPage.php`](classes/SampleData/AdminPage.php) | Tools → "Hotel Bookings Sample Data" page (install / reset) |
 | [`classes/SampleData/Installer.php`](classes/SampleData/Installer.php) | Creates/drops the demo tables, runs the bundled SQL dump |
 | [`classes/Service/LocalTemplates.php`](classes/Service/LocalTemplates.php) | Registers the bundled `data/*.json` column templates as pre‑defined templates |
+| [`classes/Service/ImportTemplates.php`](classes/Service/ImportTemplates.php) | Imports those templates as saved views once, on first run |
 | [`data/sample-data.sql`](data/sample-data.sql) | Schema + demo rows |
-| [`data/*.json`](data/) | Pre‑defined column templates loadable from the Admin Columns UI |
+| [`data/*.json`](data/) | Column templates — registered as loadable templates and auto‑imported as saved views |
 | [`uninstall.php`](uninstall.php) | Drops the demo tables when the plugin is deleted |
 
 The sample‑data machinery (`AdminPage`, `Installer`) is *scaffolding for this

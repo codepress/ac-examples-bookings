@@ -13,6 +13,7 @@ namespace ACA\Examples\Bookings;
 
 use ACA\Examples\Bookings\SampleData\AdminPage;
 use ACA\Examples\Bookings\SampleData\Installer;
+use ACA\Examples\Bookings\Service\ImportTemplates;
 use ACA\Examples\Bookings\Service\LocalTemplates;
 use SplFileInfo;
 
@@ -26,6 +27,7 @@ require __DIR__ . '/classes/PluginActionLinks.php';
 require __DIR__ . '/classes/SampleData/Installer.php';
 require __DIR__ . '/classes/SampleData/AdminPage.php';
 require __DIR__ . '/classes/Service/LocalTemplates.php';
+require __DIR__ . '/classes/Service/ImportTemplates.php';
 
 (new Requirements())->register();
 
@@ -37,6 +39,10 @@ new CustomListTableInit();
 
 // Register the bundled column templates (data/*.json) as pre-defined templates.
 (new LocalTemplates(new SplFileInfo(__DIR__ . '/data')))->register();
+
+// Import those templates as saved views on first run, so the screen is ready
+// to use without manually loading a template.
+(new ImportTemplates(new SplFileInfo(__DIR__ . '/data')))->register();
 
 // Add an "Edit Columns" link to the plugin row on the Plugins screen.
 (new PluginActionLinks(AC_EXAMPLES_BOOKINGS_FILE))->register();
