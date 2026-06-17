@@ -34,15 +34,16 @@ Seeing the result makes the code easier to read.
    Bookings example plugin and drop this folder into `wp-content/plugins/`. No
    build step and no dependencies — the classes are loaded with plain `require`s
    in the bootstrap, so there's nothing to install.
-3. Activate **"ACP Sample Data – Hotel Bookings"** in WordPress.
-4. Import the sample data: go to **Tools → Hotel Bookings Sample Data** and click
-   **"Create & populate sample tables"**. This creates `wp_hbk_guests`,
-   `wp_hbk_rooms` and `wp_hbk_bookings` and loads the demo rows.
-5. Open the new **Hotel Bookings** menu item in the admin sidebar and explore the
+3. Activate **"ACP Sample Data – Hotel Bookings"** in WordPress. Activation
+   automatically creates `wp_hbk_guests`, `wp_hbk_rooms` and `wp_hbk_bookings`
+   and loads the demo rows — no manual import step.
+4. Open the new **Hotel Bookings** menu item in the admin sidebar and explore the
    available views.
 
-To start over, the same Tools page has a **"Drop tables (reset)"** button.
-Deleting the plugin removes the tables too (see [`uninstall.php`](uninstall.php)).
+Need to reinstall or start over? **Tools → Hotel Bookings Sample Data** has
+**"Create & populate sample tables"** and **"Drop tables (reset)"** buttons.
+Deactivating the plugin drops the tables (they're recreated on reactivation), and
+deleting the plugin removes them too (see [`uninstall.php`](uninstall.php)).
 
 ---
 

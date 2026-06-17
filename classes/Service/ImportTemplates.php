@@ -5,11 +5,10 @@ declare(strict_types=1);
 namespace ACA\Examples\Bookings\Service;
 
 use AC;
-use AC\ListScreenRepository\Storage;
-use AC\Type\ListScreenId;
 use AC\Type\ListScreenStatus;
-use ACP\ListScreenFactory;
-use ACP\ListScreenRepository\TemplateJsonFile;
+use ACP\Import\ImportOptions;
+use ACP\Import\ListScreenImporter;
+use RuntimeException;
 use SplFileInfo;
 
 /**
@@ -18,12 +17,11 @@ use SplFileInfo;
  * configured out of the box — no manual "load template" step.
  *
  * This is the programmatic equivalent of clicking "Import" in the template
- * picker. It uses the same API as ACP's import handler
- * (ACP\RequestHandler\Ajax\ListScreenImportTemplate):
- *
- *   1. find the template by id in the read-only template repository,
- *   2. duplicate() it so it gets a fresh id (and segment/rule keys),
- *   3. save() the copy to writable storage (the wp_admin_columns table).
+ * picker. It delegates to ACP's public import API (ACP\Import\ListScreenImporter),
+ * which reads the *.json files in /data and, for each, duplicates the view so it
+ * gets a fresh id (and segment/rule keys) and saves the copy to writable storage
+ * (the wp_admin_columns table). The active status overwrite makes the views
+ * visible immediately.
  *
  * Runs once, guarded by an option flag, so it does not re-import on every
  * request — a user can freely edit or delete the imported views afterwards
@@ -68,73 +66,29 @@ class ImportTemplates
             return;
         }
 
-        $templates = $container->get(TemplateJsonFile::class);
-        $factory = $container->get(ListScreenFactory::class);
-        $storage = $container->get(Storage::class);
+        $importer = $container->get(ListScreenImporter::class);
 
-        $ids = $this->get_template_ids();
-        $imported = 0;
-
-        foreach ($ids as $id) {
-            $template = $templates->find($id);
-
-            if (! $template) {
-                continue;
-            }
-
-            $list_screen = $factory->duplicate($template);
-            $list_screen->set_status(ListScreenStatus::create_active());
-
-            $storage->save($list_screen);
-            $imported++;
+        try {
+            $imported = $importer->from_directory(
+                (string)$this->dir->getRealPath(),
+                ImportOptions::create()->with_status(ListScreenStatus::create_active())
+            );
+        } catch (RuntimeException $e) {
+            // Unreadable path or a malformed file: leave the flag unset so a
+            // later request retries, rather than fataling admin_init.
+            return;
         }
 
-        // Only mark done once every bundled template imported. A template can
+        // Only mark done once at least one template imported. A template can
         // only be decoded once its data source resolves, which needs the demo
-        // tables (wp_hbk_*) to exist — so before "Create & populate sample
-        // tables" has run, find() returns null. Leaving the flag unset lets a
-        // later request (e.g. the redirect right after the tables are created)
-        // retry and succeed, with no user action.
-        if ($ids && $imported === count($ids)) {
+        // tables (wp_hbk_*) to exist — before "Create & populate sample tables"
+        // has run, the importer skips it (has_list_screen() returns false) and
+        // the returned collection is empty. Leaving the flag unset lets a later
+        // request (e.g. the redirect right after the tables are created) retry
+        // and succeed, with no user action.
+        if ($imported->count() > 0) {
             update_option(self::IMPORTED_OPTION, true, false);
         }
-    }
-
-    /**
-     * The list-screen ids embedded in our bundled data/*.json files.
-     *
-     * We look up our templates by id rather than calling the repository's
-     * find_all(): that repository reads from a site-wide filter
-     * (acp/storage/template/files) which other plugins may also feed, so
-     * scoping to our own ids keeps the import to exactly these two views.
-     *
-     * @return ListScreenId[]
-     */
-    private function get_template_ids(): array
-    {
-        $ids = [];
-
-        $files = glob(rtrim((string)$this->dir->getRealPath(), '/') . '/*.json') ?: [];
-
-        foreach ($files as $file) {
-            $contents = file_get_contents($file);
-
-            if ($contents === false) {
-                continue;
-            }
-
-            $data = json_decode($contents, true);
-
-            foreach ((array)$data as $screen) {
-                $id = $screen['list_screen']['id'] ?? null;
-
-                if (is_string($id) && $id !== '') {
-                    $ids[] = new ListScreenId($id);
-                }
-            }
-        }
-
-        return $ids;
     }
 
 }
