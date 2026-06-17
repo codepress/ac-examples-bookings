@@ -30,7 +30,7 @@ Seeing the result makes the code easier to read.
 1. Make sure **Admin Columns Pro 7.1+** is active with the **Data Sources**
    addon enabled. (If it isn't, the plugin shows an admin notice explaining
    why the table won't appear — see [`Requirements.php`](classes/Requirements.php).)
-2. [Download](https://github.com/codepress/ac-examples-bookings) the Hotel
+2. [Download](https://github.com/codepress/ac-examples-bookings/archive/refs/heads/main.zip) the Hotel
    Bookings example plugin and drop this folder into `wp-content/plugins/`. No
    build step and no dependencies — the classes are loaded with plain `require`s
    in the bootstrap, so there's nothing to install.
