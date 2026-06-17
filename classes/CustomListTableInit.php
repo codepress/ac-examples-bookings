@@ -48,6 +48,14 @@ class CustomListTableInit
 
     public function register(DataSourceRegistry $registry): void
     {
+        // Bail out if the demo tables haven't been imported (or were removed).
+        // Registering a Data Source for a missing table makes the addon throw
+        // a TableNotReadableException, surfacing a "Table ... is not readable"
+        // admin notice. Checking up front keeps the screen clean.
+        if (! $this->tables_exist(['wp_hbk_guests', 'wp_hbk_rooms', 'wp_hbk_bookings'])) {
+            return;
+        }
+
         // ------------------------------------------------------------------ //
         // Guests lookup — resolves bookings.guest_id -> guest full name.     //
         // The table identifier is set to `full_name` (a generated column),   //
@@ -135,6 +143,26 @@ class CustomListTableInit
             Entry::create($bookings)
                 ->set_menu('Hotel Bookings', 'Hotel Bookings', 'dashicons-calendar-alt', 25)
         );
+    }
+
+    /**
+     * @param string[] $tables Full table names (including prefix).
+     */
+    private function tables_exist(array $tables): bool
+    {
+        global $wpdb;
+
+        foreach ($tables as $table) {
+            $found = $wpdb->get_var(
+                $wpdb->prepare('SHOW TABLES LIKE %s', $table)
+            );
+
+            if ($found !== $table) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

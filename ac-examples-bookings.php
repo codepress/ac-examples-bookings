@@ -37,6 +37,17 @@ new CustomListTableInit();
     new Installer(__DIR__ . '/data/sample-data.sql')
 ))->register();
 
+// Drop the demo tables and clear the imported-templates flag when the plugin
+// is deactivated. This is demo data, so it is safe to remove on deactivate;
+// deleting the plugin runs uninstall.php, which performs the same cleanup.
+register_deactivation_hook(AC_EXAMPLES_BOOKINGS_FILE, static function (): void {
+    (new Installer(__DIR__ . '/data/sample-data.sql'))->uninstall();
+
+    // Mirrors ImportTemplates::IMPORTED_OPTION — clearing it lets a reinstall
+    // re-import the bundled templates.
+    delete_option('aca_examples_bookings_templates_imported');
+});
+
 // Register the bundled column templates (data/*.json) as pre-defined templates.
 (new LocalTemplates(new SplFileInfo(__DIR__ . '/data')))->register();
 
