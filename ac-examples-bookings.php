@@ -22,6 +22,7 @@ define('AC_EXAMPLES_BOOKINGS_FILE', __FILE__);
 // with plain requires rather than an autoloader. Nothing to install.
 require __DIR__ . '/classes/Requirements.php';
 require __DIR__ . '/classes/CustomListTableInit.php';
+require __DIR__ . '/classes/PluginActionLinks.php';
 require __DIR__ . '/classes/SampleData/Installer.php';
 require __DIR__ . '/classes/SampleData/AdminPage.php';
 require __DIR__ . '/classes/Service/LocalTemplates.php';
@@ -36,3 +37,6 @@ new CustomListTableInit();
 
 // Register the bundled column templates (data/*.json) as pre-defined templates.
 (new LocalTemplates(new SplFileInfo(__DIR__ . '/data')))->register();
+
+// Add an "Edit Columns" link to the plugin row on the Plugins screen.
+(new PluginActionLinks(AC_EXAMPLES_BOOKINGS_FILE))->register();

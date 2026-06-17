@@ -16,7 +16,7 @@ human‑readable labels.
 |---|---|
 | **Requires** | Admin Columns Pro **7.1+** with the **Data Sources** addon active, PHP 7.4+ |
 | **Demo dataset** | ~210 bookings, 80 guests, 10 rooms |
-| **What you write** | One ~140‑line PHP class. No templates, no React, no `WP_List_Table` subclass. |
+| **What you write** | One ~140‑line PHP class. No PHP view templates, no React, no `WP_List_Table` subclass. |
 
 > Official guide: [How to set up Custom List Tables](https://docs.admincolumns.com/article/120-how-to-setup-custom-list-tables)
 > More recipes: [Custom List Tables Cookbook](https://github.com/codepress/ac-custom-list-tables-cookbook)
@@ -58,7 +58,7 @@ Seeing the result makes the code easier to read.
    addon enabled. (If it isn't, the plugin shows an admin notice explaining
    why the table won't appear — see [`Requirements.php`](classes/Requirements.php).)
 2. Drop this folder into `wp-content/plugins/`. No build step and no
-   dependencies — the four classes are loaded with plain `require`s in the
+   dependencies — the classes are loaded with plain `require`s in the
    bootstrap, so there's nothing to install.
 3. Activate **"ACP Sample Data – Hotel Bookings"**.
 4. Go to **Tools → Hotel Bookings Sample Data** and click
@@ -278,9 +278,8 @@ hard‑coding a join: every related table is itself fully typed and reusable.
 ## What you do in the UI (no code)
 
 The code gives you a working, sensible table. The finishing touches live in
-Admin Columns and are stored per‑view in `wp_admin_columns` — they are **not**
-part of this plugin. Open the **Hotel Bookings** screen, click the Admin Columns
-settings, and:
+Admin Columns and are stored per‑view in `wp_admin_columns`. Open the **Hotel
+Bookings** screen, click the Admin Columns settings, and:
 
 - **Columns** — choose which to show and their order.
 - **Guest column** → set its "Column" to **Guest** (`full_name`); **Room** →
@@ -297,12 +296,18 @@ The class docblock in
 [`CustomListTableInit.php`](classes/CustomListTableInit.php) lists these same
 steps next to the code, so you can see which half does what.
 
+**Don't want to do it by hand?** This plugin ships two of these arrangements as
+pre‑defined templates ([`data/*.json`](data/)). Open the Admin Columns template
+picker on the **Hotel Bookings** screen and load **"Bookings Example"** to apply
+the finished layout — columns, formats, filters and formatting rules — in one
+click, then tweak from there.
+
 ---
 
 ## How the plugin is wired together
 
 The bootstrap is [`ac-examples-bookings.php`](ac-examples-bookings.php), and it
-does only three things:
+does only a few things:
 
 ```php
 (new Requirements())->register();   // admin notice if ACP/Data Sources missing
@@ -312,6 +317,10 @@ new CustomListTableInit();          // <-- the part you came here for
 (new AdminPage(                     // Tools page to install/reset the demo data
     new Installer(__DIR__ . '/data/sample-data.sql')
 ))->register();
+
+(new LocalTemplates(                // ship the data/*.json column templates
+    new SplFileInfo(__DIR__ . '/data')
+))->register();
 ```
 
 | File | Responsibility |
@@ -319,9 +328,12 @@ new CustomListTableInit();          // <-- the part you came here for
 | [`ac-examples-bookings.php`](ac-examples-bookings.php) | Plugin header, `require`s the classes, bootstrap |
 | [`classes/CustomListTableInit.php`](classes/CustomListTableInit.php) | **The example.** Registers the data sources, types, relations and menu |
 | [`classes/Requirements.php`](classes/Requirements.php) | Detects whether ACP + Data Sources is active; shows a notice if not |
+| [`classes/PluginActionLinks.php`](classes/PluginActionLinks.php) | Adds an "Edit Columns" link to the plugin row, opening the column editor |
 | [`classes/SampleData/AdminPage.php`](classes/SampleData/AdminPage.php) | Tools → "Hotel Bookings Sample Data" page (install / reset) |
 | [`classes/SampleData/Installer.php`](classes/SampleData/Installer.php) | Creates/drops the demo tables, runs the bundled SQL dump |
+| [`classes/Service/LocalTemplates.php`](classes/Service/LocalTemplates.php) | Registers the bundled `data/*.json` column templates as pre‑defined templates |
 | [`data/sample-data.sql`](data/sample-data.sql) | Schema + demo rows |
+| [`data/*.json`](data/) | Pre‑defined column templates loadable from the Admin Columns UI |
 | [`uninstall.php`](uninstall.php) | Drops the demo tables when the plugin is deleted |
 
 The sample‑data machinery (`AdminPage`, `Installer`) is *scaffolding for this
