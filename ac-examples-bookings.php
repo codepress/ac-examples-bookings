@@ -13,15 +13,18 @@ namespace ACA\Examples\Bookings;
 
 use ACA\Examples\Bookings\SampleData\AdminPage;
 use ACA\Examples\Bookings\SampleData\Installer;
+use ACA\Examples\Bookings\Service\LocalTemplates;
+use SplFileInfo;
 
 define('AC_EXAMPLES_BOOKINGS_FILE', __FILE__);
 
-// Only four classes, all in the ACA\Examples\Bookings\ namespace, so we load
-// them with plain requires rather than an autoloader. Nothing to install.
+// All classes live in the ACA\Examples\Bookings\ namespace, so we load them
+// with plain requires rather than an autoloader. Nothing to install.
 require __DIR__ . '/classes/Requirements.php';
 require __DIR__ . '/classes/CustomListTableInit.php';
 require __DIR__ . '/classes/SampleData/Installer.php';
 require __DIR__ . '/classes/SampleData/AdminPage.php';
+require __DIR__ . '/classes/Service/LocalTemplates.php';
 
 (new Requirements())->register();
 
@@ -30,3 +33,6 @@ new CustomListTableInit();
 (new AdminPage(
     new Installer(__DIR__ . '/data/sample-data.sql')
 ))->register();
+
+// Register the bundled column templates (data/*.json) as pre-defined templates.
+(new LocalTemplates(new SplFileInfo(__DIR__ . '/data')))->register();
