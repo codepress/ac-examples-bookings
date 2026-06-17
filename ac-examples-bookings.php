@@ -16,23 +16,12 @@ use ACA\Examples\Bookings\SampleData\Installer;
 
 define('AC_EXAMPLES_BOOKINGS_FILE', __FILE__);
 
-$autoload = __DIR__ . '/vendor/autoload.php';
-
-if (! is_readable($autoload)) {
-    add_action('admin_notices', static function (): void {
-        printf(
-            '<div class="notice notice-error"><p>%s</p></div>',
-            esc_html__(
-                'ACP Sample Data – Hotel Bookings is missing its Composer dependencies. Run "composer install" in the plugin directory.',
-                'ac-examples-bookings'
-            )
-        );
-    });
-
-    return;
-}
-
-require $autoload;
+// Only four classes, all in the ACA\Examples\Bookings\ namespace, so we load
+// them with plain requires rather than an autoloader. Nothing to install.
+require __DIR__ . '/classes/Requirements.php';
+require __DIR__ . '/classes/CustomListTableInit.php';
+require __DIR__ . '/classes/SampleData/Installer.php';
+require __DIR__ . '/classes/SampleData/AdminPage.php';
 
 (new Requirements())->register();
 
