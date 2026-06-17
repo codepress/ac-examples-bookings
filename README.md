@@ -76,22 +76,22 @@ deliberate: the point is that *your existing schema* needs no changes.
 
 ```
 wp_hbk_bookings                        wp_hbk_guests
-┌─────────────────────────┐            ┌──────────────────────────┐
-│ id            (PK)       │      ┌────▶│ id              (PK)      │
-│ reference               │      │     │ first_name               │
-│ guest_id  ──────────────┼──────┘     │ last_name                │
-│ room_id   ──────────────┼──────┐     │ full_name  (generated)   │ ◀── label
-│ check_in   (unix ts)    │      │     │ email                    │
-│ check_out  (unix ts)    │      │     │ phone / country          │
-│ nights / guests_count   │      │     └──────────────────────────┘
-│ total_amount / amount_paid     │
-│ status         (0–3)    │      │     wp_hbk_rooms
-│ payment_status (0–2)    │      │     ┌──────────────────────────┐
-│ source                  │      └────▶│ id              (PK)      │
-│ notes                   │            │ room_code                │
-│ created_at / updated_at │            │ room_type                │ ◀── label
-└─────────────────────────┘            │ capacity / rate / active │
-                                       └──────────────────────────┘
+┌───────────────────────────┐            ┌──────────────────────────┐
+│ id            (PK)        │      ┌────▶│ id              (PK)     │
+│ reference                 │      │     │ first_name               │
+│ guest_id  ────────────────┼──────┘     │ last_name                │
+│ room_id   ────────────────┼──────┐     │ full_name  (generated)   │ ◀── label
+│ check_in   (unix ts)      │      │     │ email                    │
+│ check_out  (unix ts)      │      │     │ phone / country          │
+│ nights / guests_count     │      │     └──────────────────────────┘
+│ total_amount / amount_paid│      │
+│ status         (0–3)      │      │     wp_hbk_rooms
+│ payment_status (0–2)      │      │     ┌──────────────────────────┐
+│ source                    │      └────▶│ id              (PK)     │
+│ notes                     │            │ room_code                │
+│ created_at / updated_at   │            │ room_type                │ ◀── label
+└───────────────────────────┘            │ capacity / rate / active │
+                                         └──────────────────────────┘
 ```
 
 Two things in the schema are worth calling out because the registration code
