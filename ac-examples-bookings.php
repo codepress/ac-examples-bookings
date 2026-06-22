@@ -33,16 +33,16 @@ require __DIR__ . '/classes/Service/ImportTemplates.php';
 
 new CustomListTableInit();
 
-(new AdminPage(
-    new Installer(__DIR__ . '/data/sample-data.sql')
-))->register();
+$installer = new Installer(__DIR__ . '/data/sample-data.sql');
+
+(new AdminPage($installer))->register();
 
 // (Re)create and populate the demo tables when the plugin is activated, so a
 // deactivate/reactivate cycle restores the sample data automatically. install()
 // is a no-op when the tables already exist, so a first-time activation that
 // happens before the data source is registered stays safe too.
-register_activation_hook(AC_EXAMPLES_BOOKINGS_FILE, static function (): void {
-    (new Installer(__DIR__ . '/data/sample-data.sql'))->install();
+register_activation_hook(AC_EXAMPLES_BOOKINGS_FILE, static function () use ($installer): void {
+    $installer->install();
 });
 
 // Drop the demo tables when the plugin is deactivated. This is demo data, so it
@@ -53,8 +53,8 @@ register_activation_hook(AC_EXAMPLES_BOOKINGS_FILE, static function (): void {
 // reactivation recreates the tables under the same names, so the existing views
 // keep working. Clearing the flag here would instead make ImportTemplates
 // re-import on the next load, duplicating those views.
-register_deactivation_hook(AC_EXAMPLES_BOOKINGS_FILE, static function (): void {
-    (new Installer(__DIR__ . '/data/sample-data.sql'))->uninstall();
+register_deactivation_hook(AC_EXAMPLES_BOOKINGS_FILE, static function () use ($installer): void {
+    $installer->uninstall();
 });
 
 // Register the bundled column templates (data/*.json) as pre-defined templates.

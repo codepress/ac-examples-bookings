@@ -23,6 +23,10 @@ foreach ($tables as $table) {
 }
 
 // Mirrors ImportTemplates::IMPORTED_OPTION — clearing it lets a reinstall
-// re-import the bundled templates. (The imported views themselves live in
-// wp_admin_columns and are left untouched.)
+// re-import the bundled templates.
+//
+// The imported views themselves live in wp_admin_columns and are left
+// untouched here, so a reinstall that follows will re-import on top of them and
+// duplicate the views. That's an accepted trade-off for this example plugin:
+// uninstall keeps the user's saved views rather than deleting their data.
 delete_option('aca_examples_bookings_templates_imported');
